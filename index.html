@@ -242,23 +242,25 @@ function setRing(n){
 }
 function move(dir){ if(setRing(Math.max(0,Math.min(2,G.ring+dir))))beep(dir>0?620:380,.05,'square',.022) }
 function cycle(){ setRing((G.ring+1)%3);beep(520,.05,'square',.022) }
-function overdrive(){
-  if(state!=='play'||G.od<1||G.odT>0)return;
+function overdrive(fromKey){
+  if(state!=='play'||G.odT>0)return;
+  if(G.od<1){ if(fromKey){floatText('게이지 '+Math.floor(G.od*100)+'%',C.muted,-30);beep(160,.06,'square',.02)} return }
   G.od=0;G.odT=3.5;G.shake=reduce?0:6;
   banner('OVERDRIVE','오버드라이브!','3.5초 무적 · 점수 2배',1.4);
   beep(300,.5,'sawtooth',.05,3);
 }
-$('odbtn').addEventListener('click',e=>{e.stopPropagation();overdrive()});
+$('odbtn').addEventListener('click',e=>{e.stopPropagation();overdrive(true);e.currentTarget.blur()});
 
 addEventListener('keydown',e=>{
   if(e.repeat)return;
-  const k=e.key;
+  // use physical key codes so keys work even when the Korean IME is on (E -> ㄷ)
+  const c=e.code, k=e.key;
   if(state==='play'){
-    if(k==='ArrowUp'||k==='w'||k==='W'){move(1);e.preventDefault()}
-    else if(k==='ArrowDown'||k==='s'||k==='S'){move(-1);e.preventDefault()}
-    else if(k===' '){cycle();e.preventDefault()}
-    else if(k==='e'||k==='E'||k==='Shift'){overdrive();e.preventDefault()}
-  }else if((state==='title'||state==='over')&&(k===' '||k==='Enter')){e.preventDefault();start()}
+    if(c==='ArrowUp'||c==='KeyW'){move(1);e.preventDefault()}
+    else if(c==='ArrowDown'||c==='KeyS'){move(-1);e.preventDefault()}
+    else if(c==='Space'){cycle();e.preventDefault()}
+    else if(c==='KeyE'||c==='ShiftLeft'||c==='ShiftRight'||k==='e'||k==='E'||k==='ㄷ'){overdrive(true);e.preventDefault()}
+  }else if((state==='title'||state==='over')&&(c==='Space'||c==='Enter'||c==='NumpadEnter')){e.preventDefault();start()}
 });
 cv.addEventListener('pointerdown',e=>{
   if(state==='play'){
